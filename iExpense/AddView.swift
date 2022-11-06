@@ -12,6 +12,7 @@ struct AddView: View {
     @State private var type = Types.personal
     @State private var amount = 0.0
     @State private var currency = Currency.usd
+    @FocusState var selectedName: Bool
 
     @ObservedObject var expenses: Expenses
 
@@ -22,6 +23,7 @@ struct AddView: View {
         NavigationView {
             Form {
                 TextField("Name", text: $name)
+                    .focused($selectedName)
 
                 Picker("Type", selection: $type) {
                     ForEach(Types.allCases, id: \.self) { type in
@@ -51,6 +53,9 @@ struct AddView: View {
                     dismiss()
                 }
             }
+        }
+        .onAppear {
+            selectedName = true
         }
     }
 }

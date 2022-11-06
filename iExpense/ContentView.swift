@@ -15,7 +15,7 @@ struct ContentView: View {
         NavigationView {
             List {
                 ForEach(Types.allCases, id: \.self) { type in
-                    Section (sessionTitle(type: type, expenses: expenses)) {
+                    Section (expenses.sessionTitle(type: type)) {
                         ItemsView(expenses: expenses, type: type)
                     }
                 }
@@ -36,33 +36,17 @@ struct ContentView: View {
 
 }
 
-func sessionTitle (type: Types, expenses: Expenses) -> String {
-    let title = type.rawValue
-
-    let typePersonal = Types.personal.rawValue
-    let typeBusiness = Types.business.rawValue
-
-    let personalExpenses = expenses.loadExpenses(filterType: .personal)
-    let businessExpensens = expenses.loadExpenses(filterType: .business)
-
-    return title == typePersonal && personalExpenses.isEmpty || title == typeBusiness && businessExpensens.isEmpty ? "" : title
-}
-
 struct ItemsView: View {
     @ObservedObject var expenses: Expenses
 
     let type: Types
 
-    var personalExpenses: [ExpenseItem] {
-        expenses.loadExpenses(filterType: .personal)
+    var loadExpenses: [ExpenseItem] {
+        expenses.loadExpenses(filterType: type == .personal ? .personal : .business)
     }
-
-    var businessExpenses:[ExpenseItem] {
-        expenses.loadExpenses(filterType: .business)
-    }
-
+    
     var body: some View {
-        ForEach( type == .personal ? personalExpenses : businessExpenses)  { item  in
+        ForEach(loadExpenses)  { item  in
             HStack {
                 VStack (alignment: .leading) {
                     Text(item.name)
@@ -75,16 +59,9 @@ struct ItemsView: View {
                     .amountStyles(amount: item.amount)
             }
         }
+        
         .onDelete { IndexSet in
-            var idUUID = [UUID]()
-
-            for index in IndexSet {
-                idUUID.append(type == .personal ? personalExpenses[index].id : businessExpenses[index].id)
-            }
-
-            if let itemIndex = expenses.items.firstIndex(where: {$0.id == idUUID[0] }) {
-                expenses.items.remove(at: itemIndex)
-            }
+            expenses.removeItem(indexSet: IndexSet, loadExpenses: loadExpenses)
         }
     }
 }
