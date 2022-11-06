@@ -12,12 +12,12 @@ struct AddView: View {
     @State private var type = Types.personal
     @State private var amount = 0.0
     @State private var currency = Currency.usd
+    
     @FocusState var selectedName: Bool
 
     @ObservedObject var expenses: Expenses
 
     @Environment(\.dismiss) var dismiss
-
 
     var body: some View {
         NavigationView {
@@ -30,8 +30,6 @@ struct AddView: View {
                         Text(type.rawValue)
                     }
                 }
-
-
 
                 Section("currency") {
                     Picker("Currency", selection: $currency) {
